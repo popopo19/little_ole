@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="power_motor" pkg="little_ole" type="power_motor.py" output="screen"/>
+    <node name="steer_motor" pkg="little_ole" type="steer_motor.py" output="screen"/>
+    <node name="ultrasonic_sensor" pkg="little_ole" type="ultrasonic_sensor.py" output="screen"/>
+    <node name="tilt_ball_switch" pkg="little_ole" type="tilt_ball_switch.py" output="screen"/>
+</launch>

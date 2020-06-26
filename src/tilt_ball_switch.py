@@ -5,13 +5,14 @@ import RPi.GPIO as GPIO
 from  std_msgs.msg import Bool
 
 class TiltBallSwitch:
-  def __init__(self, pin):
+  def __init__(self, pin_in, pin_out):
     rospy.init_node("tilt_ball_switch", anonymous=False)
     rospy.loginfo("======== Tilt Ball Switch Node Initaliized ========")
 
     self.tilt_ball_pub = rospy.Publisher("/tilt_ball_switch/", Bool, queue_size=10)
 
-    self.pin = pin
+    self.pin = pin_in
+    self.pin_out = pin_out
     self.rate = rospy.Rate(20.0)
     self.is_upright = True
 
@@ -20,11 +21,13 @@ class TiltBallSwitch:
     GPIO.setwarnings(False)
 
     GPIO.setup(self.pin, GPIO.IN)
+    GPIO.setup(self.pin_out, GPIO.OUT)
+    GPIO.output(self.pin_out, True)
 
     rospy.on_shutdown(self.shutdownhook)
 
     while not rospy.is_shutdown():
-      if GPIO.input(self.pin):
+      if not GPIO.input(self.pin):
         rospy.loginfo("======== Vehicle is upside down ========")
       self.wait(20)
 
@@ -37,4 +40,4 @@ class TiltBallSwitch:
     GPIO.cleanup()
 
 if __name__ == "__main__":
-  tiltball = TiltBallSwitch(16)
+  tiltball = TiltBallSwitch(16, 23)
