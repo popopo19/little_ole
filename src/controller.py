@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy, sys
-from sensor_msgs.msg import Joy
+from sensor_msgs.msg import Joy, NatSatFix
 from std_msgs.msg import Float32, Int32, Bool
 
 class Controller:
@@ -14,10 +14,12 @@ class Controller:
 		self.smotor_rotation_pub = rospy.Publisher("/steer_motor/rotation", Float32, queue_size=10)
 		self.joy_sub = rospy.Subscriber("/joy", Joy, self.joy_cb)
 		self.tilt_pub = rospy.Subscriber("/tilt_switch_ball", Bool, self.tilt_cb)
+		self.gps_sub = rospy.Subscriber("/gps", NatSatFix, self.gps_cb)
 		
 		self.state = 0
 		
 		self.joy = Joy()
+		self.gps = NatSatFix()
 		self.on_back = False; 
 		self.rate = rospy.Rate(20.0)
 		
@@ -40,6 +42,9 @@ class Controller:
 
 	def tilt_cb(self, msg):
 		self.on_back = msg.data
+
+	def gps_cb(self, msg):
+		self.gps = msg
 	
 	def dualshock_control(self):
 		if len(self.joy.buttons) != 0:
