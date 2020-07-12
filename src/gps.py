@@ -5,7 +5,7 @@ import time
 import RPi.GPIO as GPIO
 import serial
 import pynmea2
-import std_msgs.msg import NavSatFix
+from sensor_msgs.msg import NavSatFix
 
 class GPS():
 	def __init__(self):
@@ -18,7 +18,7 @@ class GPS():
 		self.gps = NavSatFix()
 
 		while not rospy.is_shutdown():
-			data = ser.readline()
+			data = self.ser.readline()
 			if b'GPRM' in data:
 				msg = pynmea2.parse(data.decode("utf-8"))
 				self.gps.latitude = msg.latitude

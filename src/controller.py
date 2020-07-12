@@ -32,7 +32,7 @@ class Controller:
 				self.menu_mode()
 
 	def menu_mode(self):
-		self.state = input("[1] - Manual Control\n21] - Explore\nChoice: ")
+		self.state = input("[1] - Manual Control\n2] - Explore\nChoice: ")
 		self.state_pub.publish(self.state)
 	
 	def joy_cb(self, msg):

@@ -5,4 +5,5 @@
     <node name="steer_motor" pkg="little_ole" type="steer_motor.py" output="screen"/>
     <node name="ultrasonic_sensor" pkg="little_ole" type="ultrasonic_sensor.py" output="screen"/>
     <node name="tilt_ball_switch" pkg="little_ole" type="tilt_ball_switch.py" output="screen"/>
+    <node name="gps" pkg="little_ole" type="gps.py" output="screen"/>
 </launch>
