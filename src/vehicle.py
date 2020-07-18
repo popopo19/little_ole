@@ -3,7 +3,7 @@
 import rospy
 import RPi.GPIO as GPIO
 from little_ole.srv import ManualControl, ManualControlResponse, AutoNav, AutoNavResponse
-from std_msgs.msg import Float32, Bool
+from std_msgs.msg import Float32, Float64, Bool, NatSatFix
 from sensor_msgs.msg import Joy
 
 class Vehicle:
@@ -13,11 +13,15 @@ class Vehicle:
 
 		self.joy = Joy()
 		self.is_upright = Bool()
+		self.sonic_dist = 0.0
+		self.gps = NavSatFix()
 
 		self.pmotor_pub = rospy.Publisher("/power_motor", Float32, queue_size=10)
 		self.smotor_pub = rospy.Publisher("/steer_motor", Float32, queue_size=10)
 		self.joy_sub = rospy.Subscriber("/joy", Joy, self.joy_cb)
 		self.tilt_ball_sub = rospy.Subscriber("/tilt_ball_switch", Bool, self.tilt_ball_cb)
+		self.sonic_dist_sub = rospy.Subscriber("/ultrasonic_sensor", Float64, self.sonic_dist_cb)
+		self.gps_sub = rospy.Subscriber("/gps", NavSatFix, self.gps_cb)
 		
 		self.manual_srv = rospy.Service("manual_control", ManualControl, self.manual_control)
 		self.autonav_srv = rospy.Service("autonav", AutoNav, self.autonav)
@@ -29,23 +33,31 @@ class Vehicle:
 	def manual_control(self, req):
 		if not req.using_keyboard:
 			while not rospy.is_shutdown():
-				if self.joy.buttons[0] > 0:
+				if self.joy.buttons[4] > 0:
 					self.forward()
-				elif self.joy.buttons[1] > 0:
+				elif self.joy.buttons[6] > 0:
 					self.backward()
 				else:
 					self.stop()
 
-				if self.joy.axes[0] > 1:
+				if self.joy.axes[4] > 1:
 					self.left()
-				if self.joy.axes[0] < 1:
+				if self.joy.axes[4] < 1:
 					self.right()
 
-				if self.joy.buttons[4]:
-					return "======== Manual Controll Ended ========"
+				if self.joy.buttons[2] or self.upside_down():
+					break
+			return ManualControlResponse("======== Manual Controll Ended ========")
+
+	def upside_down(self):
+		if not self.is_upright:
+			rospy.loginfo("======== Vehicle is upside down ========")
+			return True
+		else:
+			return False
 
 	def autonav(self, req):
-		pass
+		destination = NavSatFix()
 
 	def left(self):
 		self.smotor_pub.publish(1.0)
@@ -67,6 +79,12 @@ class Vehicle:
 
 	def tilt_ball_cb(self, msg):
 		self.is_upright = msg
+
+	def sonic_dist_cb(self, msg):
+		self.sonic_distance = msg.data
+
+	def gps_cb(self, msg):
+		self.gps = msg
 
 	def shutdownhook(self):
 		rospy.loginfo("======== Vehicle is shutting down ========")
