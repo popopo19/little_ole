@@ -14,7 +14,8 @@ class TiltBallSwitch:
     self.pin = pin_in
     self.pin_out = pin_out
     self.rate = rospy.Rate(20.0)
-    self.is_upright = True
+    self.is_upright = Bool()
+    self.is_upright.data = False
 
     # GPIO setup
     GPIO.setmode(GPIO.BCM)
@@ -27,9 +28,11 @@ class TiltBallSwitch:
     rospy.on_shutdown(self.shutdownhook)
 
     while not rospy.is_shutdown():
-      if not GPIO.input(self.pin):
-        rospy.loginfo("======== Vehicle is upside down ========")
-      self.wait(20)
+      if GPIO.input(self.pin):
+        self.is_upright.data = True
+      else:
+        self.is_upright.data = False
+      self.tilt_ball_pub.publish(self.is_upright)
 
   def wait(self, time):
     for _ in range(time):

@@ -12,7 +12,7 @@ class UltrasonicSensor:
 
     rospy.loginfo("======== Ultrasonic Sensor Node Initiated ========")
     
-    self.distance_pub = rospy.Publisher("ultrasonic_sensor/distance", Float64, queue_size=10)
+    self.distance_pub = rospy.Publisher("ultrasonic_sensor", Float64, queue_size=10)
 
     self.echo = echo
     self.trig = trig
@@ -33,7 +33,7 @@ class UltrasonicSensor:
 
     while not rospy.is_shutdown():
       self.distance_pub.publish(self.get_distance())
-      self.wait(10)
+      self.rate.sleep(1)
 
   def get_distance(self):
     GPIO.output(self.trig, GPIO.HIGH)

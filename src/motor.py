@@ -14,8 +14,7 @@ class Motor:
     self.on = False
     self.distance = 0
     self.rotation = 0 # 1 => forward, -1 => backward
-    self.rotation_sub = rospy.Subscriber("/" + self.name + "/rotation", Float32, self.rotation_cb)
-    self.distance_sub = rospy.Subscriber("/ultrasonic_sensor/distance", Float64, self.distance_cb)
+    self.rotation_sub = rospy.Subscriber("/" + self.name, Float32, self.rotation_cb)
 
     # pins
     self.en1 = en1
@@ -36,16 +35,8 @@ class Motor:
 
     while not rospy.is_shutdown():
       if self.rotation > 0:
-        # Makes sure that power_motor stops when vehicle has object in front
-        if self.name == "power_motor":
-          if self.distance > 12:
-            self.run()
-            self.rotate_forward()
-          else:
-            self.stop()
-        else:
-          self.run()
-          self.rotate_forward()
+        self.run()
+        self.rotate_forward()
       elif self.rotation < 0:
         self.run()
         self.rotate_backward()
@@ -74,9 +65,6 @@ class Motor:
 
   def rotation_cb(self, msg):
     self.rotation = msg.data
-
-  def distance_cb(self, msg):
-    self.distance = msg.data
 
   def shutdownhook(self):
     rospy.loginfo("======== " + self.name + " is shutting down ========")
