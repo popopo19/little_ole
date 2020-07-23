@@ -17,12 +17,16 @@ class Controller:
 			self.menu_mode()
 
 	def menu_mode(self):
-		choice = int(input("[1] - Manual Control\n[2] - Autonomous Navigation\nChoice: "))
+		print("======== Menu ========")
+
+		choice = int(input("[1] - Manual Control\n[2] - Autonomous Navigation\n[0] - Quit\nChoice: "))
 
 		if choice == 1:
 			print(self.manual_control(False))
-		if choice == 2:
-			pass
+		elif choice == 2:
+			x = int(input("New local x position: "))
+			y = int(input("New local y position: "))
+			print(self.autonav(x, y))
 
 	def manual_control(self, using_keyboard):
 		rospy.wait_for_service("manual_control")
@@ -32,7 +36,16 @@ class Controller:
 			return resp.response
 		except rospy.ServiceException as e:
 			print("Service call failed")
-	
+
+	def autonav(self, x, y):
+		rospy.wait_for_service("autonav")
+		try:
+			autonav = rospy.ServiceProxy("autonav", AutoNav)
+			resp = autonav(x, y)
+			return resp.response
+		except rospy.ServiceException as e:
+			print("Servce call failed")
+
 	def wait(self, time):
 		for _ in range(time):
 			self.rate.sleep()
